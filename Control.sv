@@ -65,7 +65,7 @@ always_comb begin
       Halt = 0;
     end
 
-    // MOVR
+    // MOV3
     4'b0101: begin
       Reg0Write = 1;
       GenPurpRegWrite = 1;
@@ -75,7 +75,7 @@ always_comb begin
       Halt = 0;
     end
 
-    // MOVL
+    // MOV2
     4'b0110: begin
       Reg0Write = 1;
       GenPurpRegWrite = 1;
@@ -125,7 +125,7 @@ always_comb begin
       Halt = 0;
     end
 
-    // BGE
+    // BLT
     4'b1011: begin
       Reg0Write = 0;
       GenPurpRegWrite = 0;
