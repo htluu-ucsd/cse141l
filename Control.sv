@@ -1,32 +1,190 @@
 // control decoder
-module Control #(parameter opwidth = 3, mcodebits = 4)(
-  input [mcodebits-1:0] instr,    // subset of machine code (any width you need)
-  output logic RegDst, Branch, 
-     MemtoReg, MemWrite, ALUSrc, RegWrite,
-  output logic[opwidth-1:0] ALUOp);	   // for up to 8 ALU operations
+module Control (
+  input [8:0] Inst,
+  output logic Reg0Write,         // write to accum. reg.
+               GenPurpRegWrite,   // write to general purpose reg.
+               WriteMem,          // write to data memory
+               Branch,            // branch instruction, update pc
+               MemToReg,          // select memory output to register
+               Halt               // halt program
+);
+
+wire[3:0] Opcode;
+assign Opcode = Inst[8:5]
 
 always_comb begin
-// defaults
-  RegDst 	=   'b0;   // 1: not in place  just leave 0
-  Branch 	=   'b0;   // 1: branch (jump)
-  MemWrite  =	'b0;   // 1: store to memory
-  ALUSrc 	=	'b0;   // 1: immediate  0: second reg file output
-  RegWrite  =	'b1;   // 0: for store or no op  1: most other operations 
-  MemtoReg  =	'b0;   // 1: load -- route memory instead of ALU to reg_file data in
-  ALUOp	    =   'b111; // y = a+0;
-// sample values only -- use what you need
-case(instr)    // override defaults with exceptions
-  'b0000:  begin					// store operation
-               MemWrite = 'b1;      // write to data mem
-               RegWrite = 'b0;      // typically don't also load reg_file
-			 end
-  'b00001:  ALUOp      = 'b000;  // add:  y = a+b
-  'b00010:  begin				  // load
-			   MemtoReg = 'b1;    // 
-             end
-// ...
-endcase
+  case (opcode)
 
-end
+    // AND
+    4'b0000: begin
+      Reg0Write = 1;
+      GenPurpRegWrite = 1;
+      WriteMem = 0;
+      Branch = 0;
+      MemToReg = 0;
+      Halt = 0;
+    end
+
+    // OR
+    4'b0001: begin
+      Reg0Write = 1;
+      GenPurpRegWrite = 1;
+      WriteMem = 0;
+      Branch = 0;
+      MemToReg = 0;
+      Halt = 0;
+    end
+
+    // ADD
+    4'b0010: begin
+      Reg0Write = 1;
+      GenPurpRegWrite = 1;
+      WriteMem = 0;
+      Branch = 0;
+      MemToReg = 0;
+      Halt = 0;
+    end
+
+    // SUB
+    4'b0011: begin
+      Reg0Write = 1;
+      GenPurpRegWrite = 1;
+      WriteMem = 0;
+      Branch = 0;
+      MemToReg = 0;
+      Halt = 0;
+    end
+
+    // ADDI
+    4'b0100: begin
+      Reg0Write = 1;
+      GenPurpRegWrite = 1;
+      WriteMem = 0;
+      Branch = 0;
+      MemToReg = 0;
+      Halt = 0;
+    end
+
+    // MOVR
+    4'b0101: begin
+      Reg0Write = 1;
+      GenPurpRegWrite = 1;
+      WriteMem = 0;
+      Branch = 0;
+      MemToReg = 0;
+      Halt = 0;
+    end
+
+    // MOVL
+    4'b0110: begin
+      Reg0Write = 1;
+      GenPurpRegWrite = 1;
+      WriteMem = 0;
+      Branch = 0;
+      MemToReg = 0;
+      Halt = 0;
+    end
+
+    // CMP
+    4'b0111: begin
+      Reg0Write = 0;
+      GenPurpRegWrite = 0;
+      WriteMem = 0;
+      Branch = 0;
+      MemToReg = 0;
+      Halt = 0;
+    end
+
+    // SHIFT
+    4'b1000: begin
+      Reg0Write = 1;
+      GenPurpRegWrite = 1;
+      WriteMem = 0;
+      Branch = 0;
+      MemToReg = 0;
+      Halt = 0;
+    end
+
+    // BEQ
+    4'b1001: begin
+      Reg0Write = 0;
+      GenPurpRegWrite = 0;
+      WriteMem = 0;
+      Branch = 1;
+      MemToReg = 0;
+      Halt = 0;
+    end
+
+    // BGT
+    4'b1010: begin
+      Reg0Write = 0;
+      GenPurpRegWrite = 0;
+      WriteMem = 0;
+      Branch = 1;
+      MemToReg = 0;
+      Halt = 0;
+    end
+
+    // BGE
+    4'b1011: begin
+      Reg0Write = 0;
+      GenPurpRegWrite = 0;
+      WriteMem = 0;
+      Branch = 1;
+      MemToReg = 0;
+      Halt = 0;
+    end
+
+    // BRANCH
+    4'b1100: begin
+      Reg0Write = 0;
+      GenPurpRegWrite = 0;
+      WriteMem = 0;
+      Branch = 1;
+      MemToReg = 0;
+      Halt = 0;
+    end
+
+    // STORE
+    4'b1101: begin
+      Reg0Write = 0;
+      GenPurpRegWrite = 0;
+      WriteMem = 1;
+      Branch = 0;
+      MemToReg = 0;
+      Halt = 0;
+    end
+
+    // LOAD
+    4'b1110: begin
+      Reg0Write = 1;
+      GenPurpRegWrite = 1;
+      WriteMem = 0;
+      Branch = 0;
+      MemToReg = 1;
+      Halt = 0;
+    end
+
+    // HALT
+    4'b1111: begin
+      Reg0Write = 0;
+      GenPurpRegWrite = 0;
+      WriteMem = 0;
+      Branch = 0;
+      MemToReg = 0;
+      Halt = 1;
+    end
+
+    default: begin
+      Reg0Write = 0;
+      GenPurpRegWrite = 0;
+      WriteMem = 0;
+      Branch = 0;
+      MemToReg = 0;
+      Halt = 0;
+    end
+
+  endcase
+end 
 	
 endmodule
