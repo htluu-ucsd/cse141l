@@ -1,6 +1,6 @@
 // control decoder
 module Control (
-  input [8:0] Inst,
+  input [8:0] inst,
   output logic Reg0Write,         // write to accum. reg.
                GenPurpRegWrite,   // write to general purpose reg.
                WriteMem,          // write to data memory
@@ -9,8 +9,8 @@ module Control (
                Halt               // halt program
 );
 
-wire[3:0] Opcode;
-assign Opcode = Inst[8:5]
+wire[3:0] opcode;
+assign opcode = inst[8:5];
 
 always_comb begin
   case (opcode)
