@@ -10,10 +10,10 @@ module Control (
 );
 
 wire[3:0] Opcode;
-assign Opcode = Inst[8:5]
+assign Opcode = Inst[8:5];
 
 always_comb begin
-  case (opcode)
+  case (Opcode)
 
     // AND
     4'b0000: begin
