@@ -1,7 +1,9 @@
 *.rpt
 *.qpf
 *.qsf
+*.qws
 
+assembler/*.txt
 db/
 incremental_db/
 output_files/

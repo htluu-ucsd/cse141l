@@ -2,7 +2,6 @@
 module top_level(
   input clk,
         reset,
-        req,
   output logic done);
   parameter D = 12,              // program counter width
             A = 4;               // ALU command bit width
@@ -56,7 +55,7 @@ module top_level(
   assign rd_addrB = mach_code[4:3];
   assign alu_cmd  = mach_code[8:5];
 
-  reg_file #(.pw(4)) rf1(.dat_in  (regfile_dat),	 // loads, most ops
+  reg_file #(.pw(4)) rf1(.dat_in  (dat_out),	 // loads, most ops
                          .clk,
                          .wr_en   (RegWrite),
                          .wr_addr (rd_addrA),      // in place operation
