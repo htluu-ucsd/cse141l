@@ -19,11 +19,11 @@ def convert(inFile, outFile1, outFile2):
 				   'cmp' : '0111',
 			  	 'shift' : '1000',
 				   'beq' : '1001',
- 				   'bgt' : '1010',
+ 				   'bge' : '1010',
 				   'blt' : '1011',
 				'branch' : '1100',
-				 'store' : '1101',
-				  'load' : '1110',
+				   'str' : '1101',
+				   'ldr' : '1110',
 				  'halt' : '1111'}
 	
 	R_type = ['0000', '0001', '0010', '0011', '0100', '0101', '0110', '0111', '1000']
@@ -36,7 +36,9 @@ def convert(inFile, outFile1, outFile2):
 
 	reg_imm = {'reg' : '1', 'imm' : '0'}
 
-	direction = {'l' : '1', 'r' : '0'}
+	direction = {'left' : '1', 'right' : '0'}
+
+	carry_in = {'in': '1', 'no': '0'}
 	
 	#reads through assembly and collects labels to populate lookup table
 	lut = {}
@@ -48,9 +50,11 @@ def convert(inFile, outFile1, outFile2):
 			lut[instr[0].replace(':', '')] = labelsNum
 			lut_file.write(str(lineNum) + '\n')
 			labelsNum += 1
+
+	print(lut)
 	
 	#reads through file to convert instructions to machine code
-	for line in assembly:
+	for l, line in enumerate(assembly):
 		output = ""
 		instr = line.split(); #split to get instruction and different operands
 
@@ -60,7 +64,7 @@ def convert(inFile, outFile1, outFile2):
 
 			del instr[0] #REMOVE INSTUCTION TYPE
 
-			if output in R_type or output in D_type: #2 reg operations
+			if output in R_type and output != '1000': #2 reg operations
 				instr[0] = instr[0].replace(',', '');
 
 				if registers[instr[0]] in lower_regs:
@@ -72,15 +76,9 @@ def convert(inFile, outFile1, outFile2):
 						if output[:4] == '0100':
 							output += f"{int(instr[1]):b}" # treat as immediate value, need to be converted to binary
 						else:
-							output += 'ERROR'
-						# #ADI
-						# imm = bin(int(instr[1]))[2:] #convert to binary
-						# #pad to 3 bits for immediate
-						# for i in range(0, 3-len(imm)):
-						# 	imm = '0'+imm
-						# output += imm
+							raise Exception(f"neither register nor immediate on line {l}: {line}")
 				else:
-					output += 'ERRORRRR'
+					raise Exception(f"not register 0-3 on line {l}: {line}")
 				#MOV
 				# imm = bin(int(instr[0]))[2:]
 
@@ -89,43 +87,51 @@ def convert(inFile, outFile1, outFile2):
 				# 	for i in range(0, 6-len(imm)):
 				# 		imm = '0'+imm
 				# 	output += imm
-			elif output in B_type:
+			elif output == '1000':
+				instr[0] = instr[0].replace(',', '');
+				instr[1] = instr[1].replace(',', '');
+				if (instr[0] in direction):
+					output += direction[instr[0]]
+					if (instr[1] in carry_in):
+						output += carry_in[instr[1]]
+						if (instr[2] in registers):
+							output += registers[instr[2]]
+						else:
+							raise Exception(f"not a register on line {l}: {line}")
+					else:
+						raise Exception(f"does not specify \'in\' for carry or \'no\' for no carry on line {l}: {line}")
+				else:
+					raise Exception(f"does not specify direction on line {l}: {line}")
+			elif output in B_type: #branching operation
 				# branching
-				if instr[0] in reg_imm and instr[1] in direction:
-					output += reg_imm[instr[0]]
-					output += direction[instr[1]]
+				if instr[0] in direction and instr[1] in reg_imm:
+					output += direction[instr[0]]
+					output += reg_imm[instr[1]]
 
 					if instr[2] in registers:
 						output += registers[instr[2]]
 					else:
+						if int(instr[2]) < 2:
+							output += '0'
 						if int(instr[2]) < 4:
 							output += '0'
 						output += f"{int(instr[2]):b}" # treat as immediate value
 				else:
-					output += 'ERROR'
-			# elif output[0] in D_type:
-				#remove commas from register operand names and check
-			# 	instr[0] = instr[0].replace(',', '');
-			# 	if instr[0] in registers:
-			# 		#ADR OR ADI
-			# 		output += registers[instr[0]]
-			# 		if instr[1] in registers:
-			# 			#ADR
-			# 			output += registers[instr[1]]
-			# 		else:
-			# 			#ADI
-			# 			imm = bin(int(instr[1]))[2:] #convert to binary
-			# 			#pad to 3 bits for immediate
-			# 			for i in range(0, 3-len(imm)):
-			# 				imm = '0'+imm
-			# 			output += imm
-			# 	else:
-			# 		#BR
-			# 		output += instr[0]
-			# 		imm = bin(int(lut[instr[1]]))[2:] #convert to binary
-			# 		for i in range(0, 5-len(imm)):
-			# 			imm = '0'+imm
-			# 		output += imm
+					raise Exception(f"neither register nor immediate on line {l}: {line}")
+				
+			elif output in D_type:
+			# 	remove commas from register operand names and check
+				instr[0] = instr[0].replace(',', '');
+
+				if instr[0] in registers:
+					output += registers[instr[0]]
+
+					if int(instr[1]) < 2:
+						output += '0'
+
+					output += f"{int(instr[1]):b}"
+				else:
+					raise Exception(f"not a register on line {l}: {line}")
 			else:
 				output += '11111'
 			#write binary to machine code output file
@@ -134,4 +140,5 @@ def convert(inFile, outFile1, outFile2):
 	assembly_file.close()
 	machine_file.close()
 
-convert("assembler/assembly.txt", "assembler/machine.txt", "assembler/lut.txt")
+# convert("assembler/assembly.txt", "assembler/machine.txt", "assembler/lut.txt")
+convert("Program3/program3.txt", "Program3/machine.txt", "Program3/lut.txt")

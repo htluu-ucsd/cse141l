@@ -1,18 +1,18 @@
 // program counter
-// supports both relative and absolute jumps
-// use either or both, as desired
+// supports both relative jumps
 module PC #(parameter D=12)(
-  input reset,					// synchronous reset
+  input start,
+        reset,					// synchronous reset
         clk,
-		    reljump_en,             // rel. jump enable
+        direction,
+		    jump_en,             // rel. jump enable
   input       [D-1:0] target,	// how far/where to jump
-  
   output logic[D-1:0] prog_ctr
 );
 
   always_ff @(posedge clk)
-    if (reset) prog_ctr <= '0;
-	  else if (reljump_en) prog_ctr <= prog_ctr + target;
-	  else prog_ctr <= prog_ctr + 'b1;
+    if (reset | start) prog_ctr <= '0;
+	  else if (jump_en) prog_ctr <= direction ? (prog_ctr + target) : (prog_ctr - target);
+	  else prog_ctr <= prog_ctr + 12'b1;
 
 endmodule

@@ -4,9 +4,9 @@ module reg_file #(parameter pw=4)(
   input[7:0] dat_in,
   input      clk,
   input      wr_en,           // write enable
-  input[pw:0] wr_addr,		  // write address pointer
-              rd_addrA,		  // read address pointers
-			  rd_addrB,
+  input[pw-1:0] wr_addr,	  // write address pointer
+              	rd_addrA,		  // read address pointers
+			  	rd_addrB,
   output logic[7:0] datA_out, // read data
                     datB_out);
 

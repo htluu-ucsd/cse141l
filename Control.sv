@@ -1,6 +1,7 @@
 // control decoder
 module Control (
   input [8:0] Inst,
+  input [1:0] compareFlag,
   output logic Reg0Write,         // write to accum. reg.
                GenPurpRegWrite,   // write to general purpose reg.
                WriteMem,          // write to data memory
@@ -18,7 +19,7 @@ always_comb begin
     // AND
     4'b0000: begin
       Reg0Write = 1;
-      GenPurpRegWrite = 1;
+      GenPurpRegWrite = 0;
       WriteMem = 0;
       Branch = 0;
       MemToReg = 0;
@@ -28,7 +29,7 @@ always_comb begin
     // OR
     4'b0001: begin
       Reg0Write = 1;
-      GenPurpRegWrite = 1;
+      GenPurpRegWrite = 0;
       WriteMem = 0;
       Branch = 0;
       MemToReg = 0;
@@ -38,7 +39,7 @@ always_comb begin
     // ADD
     4'b0010: begin
       Reg0Write = 1;
-      GenPurpRegWrite = 1;
+      GenPurpRegWrite = 0;
       WriteMem = 0;
       Branch = 0;
       MemToReg = 0;
@@ -48,7 +49,7 @@ always_comb begin
     // SUB
     4'b0011: begin
       Reg0Write = 1;
-      GenPurpRegWrite = 1;
+      GenPurpRegWrite = 0;
       WriteMem = 0;
       Branch = 0;
       MemToReg = 0;
@@ -58,7 +59,7 @@ always_comb begin
     // ADDI
     4'b0100: begin
       Reg0Write = 1;
-      GenPurpRegWrite = 1;
+      GenPurpRegWrite = 0;
       WriteMem = 0;
       Branch = 0;
       MemToReg = 0;
@@ -67,7 +68,7 @@ always_comb begin
 
     // MOV3
     4'b0101: begin
-      Reg0Write = 1;
+      Reg0Write = 0;
       GenPurpRegWrite = 1;
       WriteMem = 0;
       Branch = 0;
@@ -77,7 +78,7 @@ always_comb begin
 
     // MOV2
     4'b0110: begin
-      Reg0Write = 1;
+      Reg0Write = 0;
       GenPurpRegWrite = 1;
       WriteMem = 0;
       Branch = 0;
@@ -98,7 +99,7 @@ always_comb begin
     // SHIFT
     4'b1000: begin
       Reg0Write = 1;
-      GenPurpRegWrite = 1;
+      GenPurpRegWrite = 0;
       WriteMem = 0;
       Branch = 0;
       MemToReg = 0;
@@ -110,27 +111,27 @@ always_comb begin
       Reg0Write = 0;
       GenPurpRegWrite = 0;
       WriteMem = 0;
-      Branch = 1;
+      Branch = (compareFlag == 'b10);
       MemToReg = 0;
       Halt = 0;
     end
 
-    // BGT
+    // BGE
     4'b1010: begin
       Reg0Write = 0;
       GenPurpRegWrite = 0;
       WriteMem = 0;
-      Branch = 1;
+      Branch = (compareFlag == 'b01) | (compareFlag == 'b10);
       MemToReg = 0;
       Halt = 0;
     end
 
-    // BLT
+    // BLE
     4'b1011: begin
       Reg0Write = 0;
       GenPurpRegWrite = 0;
       WriteMem = 0;
-      Branch = 1;
+      Branch = (compareFlag == 'b10) | (compareFlag == 'b00);
       MemToReg = 0;
       Halt = 0;
     end
@@ -157,7 +158,7 @@ always_comb begin
 
     // LOAD
     4'b1110: begin
-      Reg0Write = 1;
+      Reg0Write = 0;
       GenPurpRegWrite = 1;
       WriteMem = 0;
       Branch = 0;
