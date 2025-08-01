@@ -20,7 +20,7 @@ def convert(inFile, outFile1, outFile2):
 			  	 'shift' : '1000',
 				   'beq' : '1001',
  				   'bge' : '1010',
-				   'blt' : '1011',
+				   'ble' : '1011',
 				'branch' : '1100',
 				   'str' : '1101',
 				   'ldr' : '1110',
@@ -38,7 +38,7 @@ def convert(inFile, outFile1, outFile2):
 
 	direction = {'left' : '1', 'right' : '0'}
 
-	carry_in = {'in': '1', 'no': '0'}
+	carry_in = {'carry': '1', 'no': '0'}
 	
 	#reads through assembly and collects labels to populate lookup table
 	lut = {}
@@ -59,7 +59,11 @@ def convert(inFile, outFile1, outFile2):
 		instr = line.split(); #split to get instruction and different operands
 
 		#make sure it is an instruction, skip over labels
-		if instr[0] in opcodes:
+		if instr[0] in opcodes or instr[0] in lut:
+			if (instr[0] in lut):
+				print(instr[0])
+				del instr[0] #REMOVE LABEL BEFORE INSTRUCTION
+
 			output += opcodes[instr[0]]
 
 			del instr[0] #REMOVE INSTUCTION TYPE
@@ -76,9 +80,9 @@ def convert(inFile, outFile1, outFile2):
 						if output[:4] == '0100':
 							output += f"{int(instr[1]):03b}" # treat as immediate value, need to be converted to binary
 						else:
-							raise Exception(f"neither register nor immediate on line {l}: {line}")
+							raise Exception(f"neither register nor immediate on LINE {l}: {line}")
 				else:
-					raise Exception(f"not register 0-3 on line {l}: {line}")
+					raise Exception(f"not register 0-3 on LINE {l}: {line}")
 			elif output == '1000':
 				instr[0] = instr[0].replace(',', '');
 				instr[1] = instr[1].replace(',', '');
@@ -89,35 +93,42 @@ def convert(inFile, outFile1, outFile2):
 						if (instr[2] in registers):
 							output += registers[instr[2]]
 						else:
-							raise Exception(f"not a register on line {l}: {line}")
+							raise Exception(f"not a register on LINE {l}: {line}")
 					else:
-						raise Exception(f"does not specify \'in\' for carry or \'no\' for no carry on line {l}: {line}")
+						raise Exception(f"does not specify \'in\' for carry or \'no\' for no carry on LINE {l}: {line}")
 				else:
-					raise Exception(f"does not specify direction on line {l}: {line}")
+					raise Exception(f"does not specify direction on LINE {l}: {line}")
 			elif output in B_type: #branching operation
 				# branching
-				if instr[0] in direction and instr[1] in reg_imm:
-					output += direction[instr[0]]
-					output += reg_imm[instr[1]]
+				output += '`to be added`'
+				# if instr[0] in direction:
+				# 	output += direction[instr[0]]
+					
+				# 	if instr[1] in reg_imm:
+				# 		output += reg_imm[instr[1]]
 
-					if instr[2] in registers:
-						output += registers[instr[2]]
-					else:
-						output += f"{int(instr[2]):03b}" # treat as immediate value
-				else:
-					raise Exception(f"neither register nor immediate on line {l}: {line}")
-				
+				# 	if instr[2] in registers:
+				# 		output += registers[instr[2]]
+				# 	else:
+				# 		output += f"{int(instr[2]):03b}" # treat as immediate value
+				# else:
+				# 	raise Exception(f"neither register nor immediate on line {l}: {line}")
 			elif output in D_type:
 			# 	remove commas from register operand names and check
 				instr[0] = instr[0].replace(',', '');
 
 				if instr[0] in registers:
-					output += registers[instr[0]]
+					output += registers[instr[0]][1:]
 					output += f"{int(instr[1]):03b}"
+
+					if instr[1] not in lut:
+						lut[instr[1].replace(':', '')] = labelsNum
 				else:
-					raise Exception(f"not a register on line {l}: {line}")
+					raise Exception(f"not a register on LINE {l}: {line}")
 			else:
 				output += '11111'
+				machine_file.write(str(output) + '\t// ' + line)
+				break
 			#write binary to machine code output file
 			machine_file.write(str(output) + '\t// ' + line + '\n')
 

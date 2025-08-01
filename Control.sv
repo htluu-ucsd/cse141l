@@ -98,8 +98,8 @@ always_comb begin
 
     // SHIFT
     4'b1000: begin
-      Reg0Write = 1;
-      GenPurpRegWrite = 0;
+      Reg0Write = 0;
+      GenPurpRegWrite = 1;
       WriteMem = 0;
       Branch = 0;
       MemToReg = 0;
