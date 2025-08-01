@@ -47,8 +47,8 @@ def convert(inFile, outFile1, outFile2):
 		lineNum += 1
 		#check if it is a label or not
 		if instr[0] not in opcodes:
-			lut[instr[0].replace(':', '')] = labelsNum
-			lut_file.write(str(lineNum) + '\n')
+			lut[instr[0].replace(':', '')] = (labelsNum, lineNum)
+			lut_file.write(instr[0] + ' ' + str(lineNum) + '\n')
 			labelsNum += 1
 
 	print(lut)
@@ -59,9 +59,9 @@ def convert(inFile, outFile1, outFile2):
 		instr = line.split(); #split to get instruction and different operands
 
 		#make sure it is an instruction, skip over labels
-		if instr[0] in opcodes or instr[0] in lut:
-			if (instr[0] in lut):
-				print(instr[0])
+		if instr[0] in opcodes or instr[0][:-1] in lut:
+			if (instr[0][:-1] in lut):
+				# print(instr)
 				del instr[0] #REMOVE LABEL BEFORE INSTRUCTION
 
 			output += opcodes[instr[0]]
@@ -100,7 +100,20 @@ def convert(inFile, outFile1, outFile2):
 					raise Exception(f"does not specify direction on LINE {l}: {line}")
 			elif output in B_type: #branching operation
 				# branching
-				output += '`to be added`'
+				# output += '`to be added`'
+
+				lut_file.write('go from ' +  instr[0] + ' ' + str(l + 1) + '\n')
+
+				lut[instr[0].replace(':', '')] = (lut[instr[0].replace(':', '')][0], lut[instr[0].replace(':', '')][1] - l - 1)
+
+				output += '1'
+
+				if lut[instr[0].replace(':', '')][1] > 0:
+					output += '1'
+				else:
+					output += '0'
+
+				output += f"{lut[instr[0].replace(':', '')][0]:03b}"
 				# if instr[0] in direction:
 				# 	output += direction[instr[0]]
 					
@@ -121,8 +134,8 @@ def convert(inFile, outFile1, outFile2):
 					output += registers[instr[0]][1:]
 					output += f"{int(instr[1]):03b}"
 
-					if instr[1] not in lut:
-						lut[instr[1].replace(':', '')] = labelsNum
+					# if instr[1] not in lut:
+					# 	lut[instr[1].replace(':', '')] = labelsNum
 				else:
 					raise Exception(f"not a register on LINE {l}: {line}")
 			else:
@@ -131,6 +144,11 @@ def convert(inFile, outFile1, outFile2):
 				break
 			#write binary to machine code output file
 			machine_file.write(str(output) + '\t// ' + line + '\n')
+
+	print(lut)
+
+	for l in lut:
+		lut_file.write(l + ': ' + str(lut[l][1]) + '\n')
 
 	assembly_file.close()
 	machine_file.close()
