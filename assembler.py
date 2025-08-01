@@ -74,19 +74,11 @@ def convert(inFile, outFile1, outFile2):
 						output += registers[instr[1]]
 					else:
 						if output[:4] == '0100':
-							output += f"{int(instr[1]):b}" # treat as immediate value, need to be converted to binary
+							output += f"{int(instr[1]):03b}" # treat as immediate value, need to be converted to binary
 						else:
 							raise Exception(f"neither register nor immediate on line {l}: {line}")
 				else:
 					raise Exception(f"not register 0-3 on line {l}: {line}")
-				#MOV
-				# imm = bin(int(instr[0]))[2:]
-
-				# if output is '0100':
-				# 	#pad to 6 bits for the immediate
-				# 	for i in range(0, 6-len(imm)):
-				# 		imm = '0'+imm
-				# 	output += imm
 			elif output == '1000':
 				instr[0] = instr[0].replace(',', '');
 				instr[1] = instr[1].replace(',', '');
@@ -111,11 +103,7 @@ def convert(inFile, outFile1, outFile2):
 					if instr[2] in registers:
 						output += registers[instr[2]]
 					else:
-						if int(instr[2]) < 2:
-							output += '0'
-						if int(instr[2]) < 4:
-							output += '0'
-						output += f"{int(instr[2]):b}" # treat as immediate value
+						output += f"{int(instr[2]):03b}" # treat as immediate value
 				else:
 					raise Exception(f"neither register nor immediate on line {l}: {line}")
 				
@@ -125,11 +113,7 @@ def convert(inFile, outFile1, outFile2):
 
 				if instr[0] in registers:
 					output += registers[instr[0]]
-
-					if int(instr[1]) < 2:
-						output += '0'
-
-					output += f"{int(instr[1]):b}"
+					output += f"{int(instr[1]):03b}"
 				else:
 					raise Exception(f"not a register on line {l}: {line}")
 			else:
