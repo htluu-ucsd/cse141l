@@ -10,7 +10,8 @@ module top_level(
               offset,
               prog_ctr;
   wire[7:0]   datA, datB,		     // from RegFile
-              muxB, 
+              mux_reg_store,
+              muxB,
 			        rslt,              // alu output
               dat_out;
   logic       sc_in,
@@ -66,7 +67,7 @@ module top_level(
 
   assign direction = mach_code[3];
   assign branch_type = mach_code[4];
-  assign offset = branch_type ? datB : target; // branching
+  assign offset = branch_type ? target : datB; // branching
 
 // fetch subassembly
   PC #(.D(D)) pc1(.start,
@@ -77,7 +78,9 @@ module top_level(
                   .target(offset),
                   .prog_ctr);
 
-  reg_file #(.pw(4)) rf1(.dat_in  (dat_out),	 // loads, most ops
+  assign mux_reg_store = ('b1101 == inst_cmd) ? dat_out : rslt;
+
+  reg_file #(.pw(4)) rf1(.dat_in  (mux_reg_store),	 // loads, most ops
                          .clk,
                          .wr_en   (Reg0Write | GenRegWrite),
                          .wr_addr (wr_addr),      // in place operation
@@ -86,21 +89,23 @@ module top_level(
                          .datA_out(datA),
                          .datB_out(datB)); 
 
-  assign muxB = (inst_cmd == 'b0100?) ? {'0, rd_addrB} : datB; //for addi, immediate addition
+  assign muxB = (inst_cmd == 'b0100) ? {'0, rd_addrB} : datB; //for addi, immediate addition
 
   alu alu1(.instruction   (inst_cmd),
            .inA           (datA),
            .inB           (muxB),
+           .direction(mach_code[3]),
+           .use_carry(mach_code[4]),
            .carry_in_shift(sc_in),   // output from sc register
            .data_out      (rslt),
            .compareFlag,
            .carry_out     (sc_o)); // input to sc register  
 
-  dat_mem dm1(.dat_in(rslt),  // from reg_file
-              .clk,
+  data_mem data_mem1(.dat_in(rslt),  // from reg_file
+              .clk(clk),
               .wr_en (MemWrite), // stores
-              .addr  (datA),
-              .dat_out);
+              .addr  ({4'b0, rd_addrB} + 8'd8), //offset by 8 for program 3
+              .dat_out(dat_out));
 
 // registered flags from ALU
   // always_ff @(posedge clk) begin

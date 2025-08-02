@@ -5,10 +5,11 @@ module PC_LUT #(parameter D=12)(
   output logic[D-1:0] target);
 
   always_comb case(addr)
-    0: target = 5;
-	1: target = 20;
-	2: target = '1;
-	default: target = 'b0;  // hold PC  
+    0: target = 'd7; //NOSWAP
+    1: target = 'd6; //WHILE
+    2: target = 'd6; //AFTERWHILE
+    3: target = 'd8; //AFTERNORMALIZE
+	default: target = 'd0;  // hold PC  
   endcase
 
 endmodule

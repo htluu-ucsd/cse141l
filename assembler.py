@@ -153,5 +153,4 @@ def convert(inFile, outFile1, outFile2):
 	assembly_file.close()
 	machine_file.close()
 
-# convert("assembler/assembly.txt", "assembler/machine.txt", "assembler/lut.txt")
-convert("Program3/program3.txt", "Program3/machine.txt", "Program3/lut.txt")
+convert("program3.txt", "mach_code.txt", "lut3.txt")
