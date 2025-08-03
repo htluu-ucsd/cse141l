@@ -1,2 +1,87 @@
+111001001	// ldr r1, 1                                   // r1 = s_eeeee_MM.1 //[num1_high]
+111011011	// ldr r3, 3                                   // r3 = s_eeeee_MM.2 //[num2_high]
 010000111	// addi r0, 7                                  // r0 = 0000_0111
-100011000	// shift left no r0                            // r0 = 0000_1110
+100010000	// shift left no r0                            // r0 = 0000_1110
+100010000	// shift left no r0                            // r0 = 0001_1100
+010000011	// addi r0, 3                                  // r0 = 0001_1111
+100010000	// shift left no r0                            // r0 = 0011_1110
+100010000	// shift left no r0                            // r0 = 0111_1100
+011000111	// mov2 r0, r7                                 // r7 = 0111_1100 // store exp mask
+000001111	// and r1, r7                                  // r0 = 0eee_ee00.1 // exp1
+011000010	// mov2 r0, r2                                 // r2 = 0eee_ee00.1 // store exp1
+000011010	// and r3, r2                                  // r0 = 0eee_ee00.2 // exp2
+011000100	// mov2 r0, r4                                 // r4 = 0eee_ee00.2 // store exp2
+011110100	// cmp r2, r4                                  // if (r2 < r4) {
+101011000	// bge NOSWAP                                  // //perform swap of float1 and float2
+110101011	// str r1, 3                                   // store [num2_high]
+110111001	// str r3, 1                                   // store [num1_high]
+111001000	// ldr r1, 0                                   // r1 =  [num1_low]
+111011010	// ldr r3, 2                                   // r3 =  [num2_low]
+110101011	// str r1, 3                                   // store [num2_low]
+110111000	// str r3, 0                                   // store [num1_low] }
+111001001	// NOSWAP: ldr r1, 1                           // r1 = seee_eeMM.1 //[num1_high] 
+000001111	// and r1, r7                                  // r0 = 0eee_ee00.1
+100000000	// shift right no r0                           // r0 = 00ee_eee0.1
+100000000	// shift right no r0                           // r0 = 000e_eeee.1
+011000100	// mov2 r0, r4                                 // r4 = 000e_eeee.1 // store exp1
+111011011	// ldr r3, 3                                   // r3 = seee_eeMM.2 //[num2_high]
+000011111	// and r3, r7                                  // r0 = 0eee_ee00.2
+100000000	// shift right no r0                           // r0 = 00ee_eee0.2
+100000000	// shift right no r0                           // r0 = 000e_eeee.2
+011000010	// mov2 r0, r2                                 // r2 = 000e_eeee.2 // store exp2
+010000011	// addi r0, 3                                  // r0 = 0000_0011
+000000011	// and r0, r3                                  // r0 = 0000_00MM.2
+011000111	// mov2 r0, r7                                 // r7 = 0000_0011 // store man_high_mask
+000011111	// and r3, r7                                  // r0 = 0000_00MM.2
+011000101	// mov2 r0, r5                                 // r5 = 0000_00MM.2 // store man_high2
+000000110	// and r0, r6                                  // r0 = 0 // clear accumulator using empty r6
+010000100	// addi r0, 4                                  // r0 = 0000_0100
+001000101	// add r0, r5                                  // r0 = 0000_01MM.2
+011000101	// mov2 r0, r5                                 // r5 = 0000_01MM.2 // store decimal: 1.man_high2
+111000010	// ldr r0, 2                                   // r0 = mmmm_mmmm.2 //[num2_low]
+011000110	// mov2 r0, r6                                 // r6 = mmmm_mmmm.2 // store man_low2
+011110100	// WHILE: cmp r2, r4                           // while (r2 < r4) {
+101011010	// bge AFTERWHILE                              // align smaller fp: exp2++ and mantissa2 >> 1
+010010001	// addi r2, 1                                  // r0 = 000e_eeee.2 + 1
+011000010	// mov2 r0, r2                                 // r2 = 000e_eeee.2 + 1 // put exp2 back to its reg
+100000101	// shift right no r5                           // r5 = 0000_001M.2
+100001110	// shift right carry r6                        // r6 = Mmmm_mmmm.2 }
+110010001	// branch WHILE                                // loop back to comparision
+000001111	// AFTERWHILE: and r1, r7                      // r0 = 0000_00MM.1 // get man_high1
+010100111	// mov3 r0, r7                                 // r0 = 0000_0011
+010000001	// addi r0, 1                                  // r0 = 0000_0100
+001000111	// add r0, r7                                  // r0 = 0000_01MM.1
+011000111	// mov2 r0, r7                                 // r7 = 0000_01MM.1 // store decimal 1.man_high
+111011000	// ldr r3, 0                                   // r3 = mmmm_mmmm.1 // load num1_low
+001011110	// add r3, r6                                  // r0 = man_low1 + man_low2 // to get c_out for man_high
+001010111	// add r2, r7                                  // r0 = man_high2 + man_high1 + c_in
+011000010	// mov2 r0, r2                                 // r2 = man_high
+001011110	// add r3, r6                                  // r0 = man_low1 + man_low2
+011000011	// mov2 r0, r3                                 // r3 = man_low
+100000101	// shift right no r5                           // r5 = r5 >> 1 // clear r5 for checking mantissa
+100000101	// shift right no r5                           // r5 = r5 >> 1
+100000101	// shift right no r5                           // r5 = r5 >> 1
+010100101	// mov3 r0, r5                                 // r0 = 0000_0000
+010000100	// addi r0, 4                                  // r0 = 0000_0100
+010000100	// addi r0, 4                                  // r0 = 0000_1000
+011000110	// mov2 r0, r6                                 // r6 = 0000_1000 // for checking mantissa
+011110110	// cmp r2, r6                                  // if (man_high > 8) {
+101111011	// ble AFTERNORMALIZE                          // shift mantissa right 1, increment exp
+010100100	// mov3 r0, r4                                 // r0 = exp1
+010000001	// addi r0, 1                                  // r0 = exp1 + 1
+100010000	// shift left no r0                            // r0 = r0 << 1
+100010000	// shift left no r0                            // r0 = r0 << 1
+011000100	// mov2 r0, r4                                 // r4 = 0_eeeee_00
+100000010	// shift right no r2                           // r2 = r2 >> 1
+100001011	// shift right carry r3                        // r3 = r3 >> 1 }
+110111100	// AFTERNORMALIZE: str r3, 4                   // store lower float into memory
+010100110	// mov3 r0, r6                                 // r0 = 0000_1000
+001000110	// add r0, r6                                  // r0 = 0001_0000
+001000110	// add r0, r6                                  // r0 = 0010_0000
+001000110	// add r0, r6                                  // r0 = 0100_0000
+001000110	// add r0, r6                                  // r0 = 1000_0000
+000000001	// and r0, r1                                  // r0 = s000_0000
+000100100	// or r0, r4                                   // r0 = s_eeeee_00
+000100010	// or r0, r2                                   // r0 = s_eeeee_MM
+110100101	// str r0, 5                                   // store upper float into memory
+111111111	// halt                                        // end program

@@ -78,7 +78,7 @@ module top_level(
                   .target(offset),
                   .prog_ctr);
 
-  assign mux_reg_store = ('b1101 == inst_cmd) ? dat_out : rslt;
+  assign mux_reg_store = ('b1110 == inst_cmd) ? dat_out : rslt;
 
   reg_file #(.pw(4)) rf1(.dat_in  (mux_reg_store),	 // loads, most ops
                          .clk,
@@ -94,8 +94,8 @@ module top_level(
   alu alu1(.instruction   (inst_cmd),
            .inA           (datA),
            .inB           (muxB),
-           .direction(mach_code[3]),
-           .use_carry(mach_code[4]),
+           .direction(mach_code[4]),
+           .use_carry(mach_code[3]),
            .carry_in_shift(sc_in),   // output from sc register
            .data_out      (rslt),
            .compareFlag,
