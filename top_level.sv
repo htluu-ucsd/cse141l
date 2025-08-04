@@ -28,7 +28,8 @@ module top_level(
   wire[A-1:0] inst_cmd;
   wire[8:0]   mach_code;         // machine code
   wire[3:0]   rd_addrA, rd_addrB, wr_a_or_b, wr_addr; // address pointers to reg_file
-  logic[1:0]  compareFlag;
+  wire[1:0]   compareFlag;
+  logic[1:0]  branchSignals;
 
   always @(posedge clk) begin
     if (reset | start) begin
@@ -52,9 +53,13 @@ module top_level(
   PC_LUT #(.D(D)) pl1(.addr(rd_addrB),
                       .target(target));
 
+  always @ (posedge clk) begin
+    if (inst_cmd == 'b0111) branchSignals <= compareFlag;
+  end
+
 // control decoder
   Control ctl1(.Inst(mach_code),
-               .compareFlag(compareFlag),
+               .compareFlag(branchSignals),
                .Reg0Write(Reg0Write),
                .GenPurpRegWrite(GenRegWrite),
                .WriteMem(MemWrite),
@@ -82,6 +87,7 @@ module top_level(
 
   reg_file #(.pw(4)) rf1(.dat_in  (mux_reg_store),	 // loads, most ops
                          .clk,
+                         .start (start | reset),
                          .wr_en   (Reg0Write | GenRegWrite),
                          .wr_addr (wr_addr),      // in place operation
                          .rd_addrA(rd_addrA),

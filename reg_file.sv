@@ -3,6 +3,7 @@
 module reg_file #(parameter pw=4)(
   input[7:0] dat_in,
   input      clk,
+  input		 start,
   input      wr_en,           // write enable
   input[pw-1:0] wr_addr,	  // write address pointer
               	rd_addrA,		  // read address pointers
@@ -19,7 +20,9 @@ module reg_file #(parameter pw=4)(
 // writes are sequential (clocked)
   always_ff @(posedge clk)
     if(wr_en)				   // anything but stores or no ops
-      core[wr_addr] <= dat_in; 
+      core[wr_addr] <= dat_in;
+	else if (start)
+		for (int i = 0; i < 2**pw; i++) core[i] <= 0;
 
 endmodule
 /*

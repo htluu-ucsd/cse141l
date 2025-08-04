@@ -148,8 +148,8 @@ module fltflt_tb();
 	flt3_test_mant  = {|flt3_test[14:10],flt3_test[9:0]};
 //  modify display statements to meet your own needs
 //   I have included decimal and binary values, for debug convenience
-    $display("flt1b = %b  %b  %b",flt1[15],flt1[14:10],flt1[9:0]);
-    $display("flt2b = %b  %b  %b",flt1[15],flt2[14:10],flt2[9:0]);
+    $display("flt1b      = %b  %b  %b",flt1[15],flt1[14:10],flt1[9:0]);
+    $display("flt2b      = %b  %b  %b",flt1[15],flt2[14:10],flt2[9:0]);
     //$display("flt1d = %18.10f * 2**%d",real'(flt1_mant)/1024.0,flt1_exp);
     //$display("flt2d = %18.10f * 2**%d",real'(flt2_mant)/1024.0,flt2_exp);
     flt1_real = (real'(flt1_mant/1024.0)) * real'(2.0**(flt1_exp));
@@ -161,11 +161,11 @@ module fltflt_tb();
     else
       flt3_real = flt1_real - flt2_real;   
 // output from first DUT 
-    $display("flt3b =  %b  %b  %b",flt3[15],flt3[14:10],flt3[9:0]);				 
+    $display("flt3b      = %b  %b  %b",flt3[15],flt3[14:10],flt3[9:0]);				 
     //$display("flt3d = %18.10f * 2**%d",real'(flt3_mant)/1024.0,flt3_exp);
     //$display("flt3r = %18.10f",(real'(flt3_mant/1024.0))*real'(2.0**flt3_exp));
 // output from second DUT
-    $display("flt3_testb =  %b   %b",flt3_test[14:10],flt3_test[9:0]);				 
+    $display("flt3_testb = %b  %b  %b",flt3_test[15],flt3_test[14:10],flt3_test[9:0]);				 
     //$display("flt3_testd = %18.10f * 2**%d",real'(flt3_test_mant)/1024.0,flt3_test_exp);
     //$display("flt3_testr = %18.10f",(real'(flt3_test_mant/1024.0))*real'(2.0**flt3_test_exp));
 // "theoretical" result

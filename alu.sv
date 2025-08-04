@@ -15,7 +15,7 @@ module alu(
 always_comb begin
   carry_out = 0;
   if (instruction == 7) compareFlag = {inA == inB, (inA - inB) > 0};
-  // else compareFlag = 2'b11;
+  else compareFlag = 2'b11;
 
   case(instruction)
     0: data_out = inA & inB; //bitwise and
@@ -26,7 +26,10 @@ always_comb begin
     5: data_out = inB; // copy data in from 2nd reg (mov3 ff sss)
     6: data_out = inA; // copy data in from 1st reg (mov3 ff sss)
     // 7: data_out = '1; // cmp result
-    8: {carry_out, data_out} = direction ? {inB, use_carry ? carry_in_shift : 1'b0} : {use_carry ? carry_in_shift : 1'b0, inB}; //shift by 1, high for left shift
+    8: begin //shift by 1, high for left shift
+      if (direction) {carry_out, data_out} = {inB, use_carry ? carry_in_shift : 1'b0};
+      else {data_out, carry_out} = {use_carry ? carry_in_shift : 1'b0, inB};
+    end
     9: data_out = inB;
     10: data_out = inB;
     11: data_out = inB;
